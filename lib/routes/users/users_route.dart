@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_http_testing/data/api_service.dart';
-
-import '../../models/user.dart';
+import 'package:flutter_http_testing/provider/users_provider.dart';
+import 'package:flutter_http_testing/routes/users/users_list.dart';
+import 'package:provider/provider.dart';
 
 class UsersRoute extends StatelessWidget {
   const UsersRoute({Key? key}) : super(key: key);
@@ -12,36 +13,10 @@ class UsersRoute extends StatelessWidget {
       appBar: AppBar(
         title: const Text("My AppBar"),
       ),
-      body: FutureBuilder<List<User>>(
-        future: ApiService().getUsers(),
-        builder: (context, snapshot) {
-          final connectionState = snapshot.connectionState;
-          switch (connectionState) {
-            case ConnectionState.none:
-              return const Center(child: Text("Not connected"));
-            case ConnectionState.waiting:
-              return const Center(child: CircularProgressIndicator());
-            case ConnectionState.active:
-              return const Center(child: CircularProgressIndicator());
-            case ConnectionState.done:
-              return snapshot.data == null
-                  ? Container()
-                  : _buildUserList(snapshot.data!);
-          }
-        },
+      body: ChangeNotifierProvider<UsersProvider>(
+        child: const UsersList(),
+        create: (context) => UsersProvider(apiService: ApiService()),
       ),
-    );
-  }
-
-  Widget _buildUserList(List<User> users) {
-    return ListView.builder(
-      itemBuilder: (context, index) {
-        return ListTile(
-          title: Text(users[index].name),
-          subtitle: Text(users[index].email),
-        );
-      },
-      itemCount: users.length,
     );
   }
 }
